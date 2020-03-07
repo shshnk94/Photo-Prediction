@@ -1,6 +1,6 @@
 import os
-from model_args import args
-from cross_val import run_cross_val
+from .model_args import args
+from .cross_val import run_cross_val
 import torch
 import pandas as pa
 

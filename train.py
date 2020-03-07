@@ -10,13 +10,13 @@ import torch.nn as nn
 import os
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
-from sampler import get_sampler
-from cnn_model import CNN
+from .sampler import get_sampler
+from .cnn_model import CNN
 import time
 import gc
-from utils import  customize_embeddings_from_pretrained_googlenews_w2v
-from evaluate import evaluate
-import data_helpers
+from .utils import  customize_embeddings_from_pretrained_googlenews_w2v
+from .evaluate import evaluate
+from . import data_helpers
 
 np=pa.np
 pa.np.random.seed(1)

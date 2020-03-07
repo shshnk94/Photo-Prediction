@@ -11,8 +11,8 @@ import shutil
 import os
 import time
 import gensim
-from train import train, eval_dev
-from best_model import get_best_epoch
+from .train import train, eval_dev
+from .best_model import get_best_epoch
 
 np=pa.np
 pa.np.random.seed(1)

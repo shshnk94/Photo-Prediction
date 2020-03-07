@@ -10,7 +10,7 @@ import time
 import numpy as np
 import pickle
 import gensim
-import data_helpers
+from . import data_helpers
 
 def create_cross_validation_fold(datapath, filename, n_splits):
    
