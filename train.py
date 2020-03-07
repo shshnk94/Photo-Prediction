@@ -41,6 +41,7 @@ def train(cv, args, embeddings=None, should_eval=True):
 
     x_train = torch.from_numpy(x_train).long()
     y_train = torch.from_numpy(y_train).long()
+    print("Training set size: ", x_train.shape)
     dataset_train = TensorDataset(x_train, y_train)
     train_labels=[t[-1] for t in dataset_train]
     train_sampler = get_sampler(dataset_train, train_labels)
@@ -91,7 +92,10 @@ def train(cv, args, embeddings=None, should_eval=True):
             bm.step(adict,epoch)
             adict.update(args)
             epoch_tracker.append(adict)
-
+    
+            with open('validation_result_cv' + str(cv) + '.csv', 'a') as handle:
+                handle.write(','.join([str(adict['Precision']), str(adict['F1']), str(adict['Accuracy'])]))
+        
     epoch_tracker = pa.DataFrame.from_dict(epoch_tracker)
     
     if should_eval:
