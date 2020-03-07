@@ -12,7 +12,7 @@ import os
 import time
 import gensim
 from train import train, eval_dev
-from BestModel import get_best_epoch
+from best_model import get_best_epoch
 
 np=pa.np
 pa.np.random.seed(1)
