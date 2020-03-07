@@ -27,7 +27,7 @@ torch.backends.cudnn.deterministic = True
 
 def train(cv, args, embeddings=None, should_eval=True):
 
-    from best_model import BestModel
+    from .best_model import BestModel
 
     x_train, y_train,vocabulary, vocabulary_inv_list = data_helpers.load_train(args['datapath'], cv)
     args['vocab_size'] = len(vocabulary_inv_list)
@@ -54,7 +54,7 @@ def train(cv, args, embeddings=None, should_eval=True):
     optimizer = torch.optim.Adam(parameters, lr=args['learning_rate'])
     criterion = nn.CrossEntropyLoss()
 
-    from early_stopping import EarlyStopping
+    from .early_stopping import EarlyStopping
     es = EarlyStopping(min_delta=0.0001, patience=args['earlystopping_patience'])
 
     bm = BestModel()
