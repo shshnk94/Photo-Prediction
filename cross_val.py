@@ -48,19 +48,19 @@ def run_cross_val(args, device):
         adict.update(args)
         cv_results.append(adict)
                     
-        if args['do_test']:
+    if args['do_test']:
 
-            if args['cross_val']:
-                num_epochs,adict = get_best_epoch(ep_tracker)
-                adict.update(args)
-                cv_results.append(adict)
-                
-            model, args, vocabulary, vocabulary_inv = train(cv, args, embeddings, False) 
-            criterion = nn.CrossEntropyLoss()
-            eval_acc, loss_test, sentence_vector, adict = eval_dev(model, None, args, criterion, vocabulary, vocabulary_inv)
+        if args['cross_val']:
+            num_epochs,adict = get_best_epoch(ep_tracker)
             adict.update(args)
+            cv_results.append(adict)
                 
+        model, args, vocabulary, vocabulary_inv = train(cv, args, embeddings, False) 
+        criterion = nn.CrossEntropyLoss()
+        eval_acc, loss_test, sentence_vector, adict = eval_dev(model, None, args, criterion, vocabulary, vocabulary_inv)
+        adict.update(args)
         cv_results.append(adict)
+
         torch.cuda.empty_cache()
         gc.collect()
             
