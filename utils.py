@@ -19,6 +19,11 @@ def create_cross_validation_fold(datapath, filename, n_splits):
 
     df = pd.read_csv(datapath + '/' + filename)
     df = df.rename(columns={"photoornot": "label"})
+    
+    #Downsample majority class
+    positive = df[df["label"] == 1]
+    negative = df[df["label"] == 0].sample(positive.shape[0])
+    df = pd.concat([positive, negative])
 
     #train-test split
     mask = np.random.rand(df.shape[0]) < 0.8
