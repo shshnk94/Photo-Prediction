@@ -14,7 +14,8 @@ class CNN(nn.Module):
     def __init__(self, pretrained_embeddings, args):
 
         super(CNN, self).__init__()
-
+        
+        self.use_cuda = args['use_cuda']
         self.kernel_sizes = args['kernel_sizes']
         self.embedding = nn.Embedding( args['vocab_size'],  args['embedding_dim'])
         self.embedding.weight.data.copy_(torch.from_numpy( pretrained_embeddings))
@@ -65,7 +66,7 @@ class CNN(nn.Module):
     def forward(self, x):       # x: (batch, sentence_len)
 
         x = self.embedding(x)   # embedded x: (batch, sentence_len, embedding_dim)
-        if args['use_cuda']:
+        if self.use_cuda:
             x = x.cuda()
 
         if self.ConvMethod == "in_channel__is_embedding_dim":
