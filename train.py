@@ -94,7 +94,7 @@ def train(cv, args, embeddings=None, should_eval=True):
             epoch_tracker.append(adict)
     
             with open('validation_result_lr' + str(args['learning_rate']) + '_cv' + str(cv) + '.csv', 'a') as handle:
-                handle.write(','.join([str(adict['Precision']), str(adict['F1']), str(adict['Accuracy'])]))
+                handle.write(','.join([str(adict['Precision']), str(adict['F1']), str(adict['Accuracy'])]) + '\n')
         
     epoch_tracker = pa.DataFrame.from_dict(epoch_tracker)
     

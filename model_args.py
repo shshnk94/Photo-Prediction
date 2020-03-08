@@ -15,7 +15,7 @@ args={
       'num_filters':100,
       'embedding_dim': 300,
       'batch_size':64,
-      'use_cuda':False,
+      'use_cuda':True,
       'use_pretrained_embeddings':True,
       'mode': 'nonstatic',# 'nonstatic'
       'ConvMethod':"in_channel__is_embedding_dim",# "in_channel__is_embedding_dim",#"in_channel__is_1"
