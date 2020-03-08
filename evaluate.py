@@ -62,7 +62,7 @@ def evaluate(model, x_test, y_test,args,loss_fn,eval_type='val',verbose= False):
     if args['use_cuda']:
         preds_c = preds_c.cuda()
         preds = preds.cuda()
-        adict=val_performance(y_test.detach().cpu().numpy(), preds_c.detach().cpu().numpy(), preds.detach().cpu().numpy(), args['Dependent'],eval_type,verbose= False)
+        adict=val_performance(y_test.detach().cpu().numpy(), preds_c.detach().cpu().numpy(), preds.detach().cpu().numpy(), '',eval_type,verbose= False)
     else:
         adict=val_performance(y_test.detach().numpy(), preds_c.detach().numpy(), preds.detach().numpy())
 

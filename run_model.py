@@ -26,7 +26,7 @@ args['earlystopping_patience']=5
 
 embeddings = None
 if args['use_pretrained_embeddings']:
-    embeddings = gensim.models.KeyedVectors.load_word2vec_format(args['pretrained_embedding_fpath'], binary=True)
+    embeddings = gensim.models.KeyedVectors.load_word2vec_format(args['pretrained_embedding_fpath'], binary=True, limit=500000)
     print('Please wait ... (it could take a while to load the file : {})'.format(args['pretrained_embedding_fpath']))
 
 if __name__=='__main__':
@@ -39,9 +39,11 @@ if __name__=='__main__':
                9e-7, 8e-7, 7e-7,6e-7,5e-7,4e-7,3e-7,2e-7,1e-7
                ]:
 
-        args['learning_rate'] = lr
+        args['learning_rate'] = 1e-6
         cv_results = run_cross_val(args, embeddings, device)
         results.append(cv_results)
+
+        break
    
     x = [pa.DataFrame.from_dict(ix) for ix in results]
     df = pa.concat(x)
