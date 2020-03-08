@@ -48,7 +48,15 @@ def run_cross_val(args, embeddings, device):
                 
         model, args, vocabulary, vocabulary_inv = train(cv, args, embeddings, False) 
         criterion = nn.CrossEntropyLoss()
-        eval_acc, loss_test, sentence_vector, adict = eval_dev(model, None, args, criterion, vocabulary, vocabulary_inv)
+        x_test, y_test, vocabulary, vocabulary_inv_list = data_helpers.load_data(args['datapath'],
+                                                                                 None,
+                                                                                 vocabulary, 
+                                                                                 vocabulary_inv_list, 
+                                                                                 args['sentence_len'])
+   
+        y_test = torch.from_numpy(y_test).long()
+        x_test = torch.from_numpy(x_test).long()
+        eval_acc, loss_test, sentence_vector, adict = eval_dev(model, x_test, y_test, None, args, criterion)
         adict.update(args)
         cv_results.append(adict)
 

@@ -17,14 +17,12 @@ class CNN(nn.Module):
         
         self.use_cuda = args['use_cuda']
         self.kernel_sizes = args['kernel_sizes']
-        self.embedding = nn.Embedding( args['vocab_size'],  args['embedding_dim'])
-        self.embedding.weight.data.copy_(torch.from_numpy( pretrained_embeddings))
-        self.embedding.weight.requires_grad = args['mode']=="nonstatic"
+        self.embedding = nn.Embedding.from_pretrained(torch.Tensor(pretrained_embeddings))
         self.ConvMethod =  args['ConvMethod']
 
         # Cannot load the entire embedding matrix to GPU as the matrix is possibly (3000000000, 300)
-        #if  args['use_cuda']:
-        #    self.embedding = self.embedding.cuda()
+        if  args['use_cuda']:
+            self.embedding = self.embedding.cuda(1)
 
         conv_blocks = []
         for kernel_size in args['kernel_sizes']:
@@ -37,11 +35,9 @@ class CNN(nn.Module):
             else:
                 conv1d = nn.Conv1d(in_channels = 1, out_channels = args['num_filters'], kernel_size = kernel_size*args['embedding_dim'], stride = args['embedding_dim'])
 
-            component = nn.Sequential(
-                conv1d,
-                nn.ReLU(),
-                nn.MaxPool1d(kernel_size = maxpool_kernel_size)
-            )
+            component = nn.Sequential(conv1d,
+                                      nn.ReLU(),
+                                      nn.MaxPool1d(kernel_size = maxpool_kernel_size))
 
             if args['use_cuda']:
                 component = component.cuda()
@@ -66,8 +62,6 @@ class CNN(nn.Module):
     def forward(self, x):       # x: (batch, sentence_len)
 
         x = self.embedding(x)   # embedded x: (batch, sentence_len, embedding_dim)
-        if self.use_cuda:
-            x = x.cuda()
 
         if self.ConvMethod == "in_channel__is_embedding_dim":
 

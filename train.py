@@ -46,7 +46,17 @@ def train(cv, args, embeddings=None, should_eval=True):
     train_labels=[t[-1] for t in dataset_train]
     train_sampler = get_sampler(dataset_train, train_labels)
     train_loader = DataLoader(dataset_train, sampler=train_sampler,batch_size=args['batch_size'], num_workers=4, pin_memory=False)
-
+    
+    #Read the validation data here to avoid reading every epoch.
+    x_test, y_test, vocabulary, vocabulary_inv_list = data_helpers.load_data(args['datapath'],
+                                                                             cv,
+                                                                             vocabulary, 
+                                                                             vocabulary_inv_list, 
+                                                                             args['sentence_len'])
+   
+    y_test = torch.from_numpy(y_test).long()
+    x_test = torch.from_numpy(x_test).long()
+    
     model = CNN(pretrained_embeddings,args)
     if args['use_cuda']:
         model = model.cuda()
@@ -86,8 +96,9 @@ def train(cv, args, embeddings=None, should_eval=True):
                     model.fc.weight.data = model.fc.weight.data * constrained_norm / model.fc.weight.data.norm()
         
         sentence_vector = None
-        if should_eval: 
-            eval_acc, loss_test, sentence_vector, adict = eval_dev(model, cv, args, criterion, vocabulary, vocabulary_inv_list)
+        if should_eval:
+ 
+            eval_acc, loss_test, sentence_vector, adict = eval_dev(model, x_test, y_test, cv, args, criterion)
             adict['val_epoch'] = epoch
             bm.step(adict,epoch)
             adict.update(args)
@@ -95,7 +106,7 @@ def train(cv, args, embeddings=None, should_eval=True):
     
             with open('validation_result_lr' + str(args['learning_rate']) + '_cv' + str(cv) + '.csv', 'a') as handle:
                 handle.write(','.join([str(adict['Precision']), str(adict['F1']), str(adict['Accuracy'])]) + '\n')
-        
+    
     epoch_tracker = pa.DataFrame.from_dict(epoch_tracker)
     
     if should_eval:
@@ -103,16 +114,7 @@ def train(cv, args, embeddings=None, should_eval=True):
 
     return model, args, vocabulary, vocabulary_inv_list
     
-def eval_dev(model, cv, args,criterion,vocabulary, vocabulary_inv_list):
-    
-    x_test, y_test, vocabulary, vocabulary_inv_list = data_helpers.load_data(args['datapath'],
-                                                                             cv,
-                                                                             vocabulary, 
-                                                                             vocabulary_inv_list, 
-                                                                             args['sentence_len'])
-   
-    y_test = torch.from_numpy(y_test).long()
-    x_test = torch.from_numpy(x_test).long()
+def eval_dev(model, x_test, y_test, cv, args, criterion):
     
     if args['use_cuda']:
         x_test = x_test.cuda()

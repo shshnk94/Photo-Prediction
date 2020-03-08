@@ -53,7 +53,7 @@ def val_performance(y_test,y_pred,y_probs,key='UNK',eval_type='val', verbose= Fa
 def evaluate(model, x_test, y_test,args,loss_fn,eval_type='val',verbose= False):
     model.eval()
     inputs = Variable(x_test)
-    #print(inputs.shape)
+    print(inputs.shape)
     preds, vector = model(inputs)
     
     preds_c = torch.max(preds, 1)[1]
