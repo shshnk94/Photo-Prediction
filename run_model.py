@@ -2,6 +2,7 @@ import os
 from .model_args import args
 from .cross_val import run_cross_val
 import torch
+import gensim
 import pandas as pa
 
 np=pa.np
@@ -23,6 +24,11 @@ args['num_train_epochs'] = 100
 args['learning_rate']=1e-5
 args['earlystopping_patience']=5
 
+embeddings = None
+if args['use_pretrained_embeddings']:
+    embeddings = gensim.models.KeyedVectors.load_word2vec_format(args['pretrained_embedding_fpath'], binary=True)
+    print('Please wait ... (it could take a while to load the file : {})'.format(args['pretrained_embedding_fpath']))
+
 if __name__=='__main__':
     
     results=[]
@@ -34,7 +40,7 @@ if __name__=='__main__':
                ]:
 
         args['learning_rate'] = lr
-        cv_results = run_cross_val(args, device)
+        cv_results = run_cross_val(args, embeddings, device)
         results.append(cv_results)
    
     x = [pa.DataFrame.from_dict(ix) for ix in results]

@@ -10,7 +10,6 @@ import gc
 import shutil
 import os
 import time
-import gensim
 from .train import train, eval_dev
 from .best_model import get_best_epoch
 
@@ -21,16 +20,8 @@ torch.cuda.manual_seed(1)
 np.random.seed(1)
 torch.backends.cudnn.deterministic = True
 
-def run_cross_val(args, device):
+def run_cross_val(args, embeddings, device):
 
-    embeddings = None
-    if args['use_pretrained_embeddings']:
-        tic = time.time()
-        print("time start: ",tic)
-        embeddings = gensim.models.KeyedVectors.load_word2vec_format(args['pretrained_embedding_fpath'], binary=True)
-        print('Please wait ... (it could take a while to load the file : {})'.format(args['pretrained_embedding_fpath']))
-        print('Done.  (time used: {:.1f}s)\n'.format(time.time()-tic))
-    
     cv_results=[]
     cvmax = args['n_splits'] if args['cross_val'] else 1
 

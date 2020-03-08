@@ -42,18 +42,16 @@ def create_cross_validation_fold(datapath, filename, n_splits):
 
 def customize_embeddings_from_pretrained_googlenews_w2v(args, vocabulary, vocabulary_inv_list, model):
 
-    pretrained_embedding_fpath= args['pretrained_embedding_fpath']
     vocabulary_inv = {rank: word for rank, word in enumerate(vocabulary_inv_list)}
-
     embedding_weights = {}
 
-    found_cnt = 0
     words = []
     for id, word in vocabulary_inv.items():
+
         words.append(word)
+
         if word in model.vocab:
             embedding_weights[id] = model.word_vec(word)
-            found_cnt += 1
         else:
             embedding_weights[id] = np.random.uniform(-0.001, 0.001, args['embedding_dim'])
 
