@@ -12,7 +12,7 @@ import pickle
 import gensim
 from . import data_helpers
 
-def create_cross_validation_fold(datapath, filename, n_splits):
+def create_cross_validation_fold(datapath, filename, n_splits, downsample=True):
    
     import pandas as pd
     from sklearn.model_selection import KFold 
@@ -21,9 +21,10 @@ def create_cross_validation_fold(datapath, filename, n_splits):
     df = df.rename(columns={"photoornot": "label"})
     
     #Downsample majority class
-    positive = df[df["label"] == 1]
-    negative = df[df["label"] == 0].sample(positive.shape[0])
-    df = pd.concat([positive, negative])
+    if downsample==True:
+        positive = df[df["label"] == 1]
+        negative = df[df["label"] == 0].sample(positive.shape[0])
+        df = pd.concat([positive, negative])
 
     #train-test split
     mask = np.random.rand(df.shape[0]) < 0.8

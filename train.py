@@ -47,16 +47,20 @@ def train(cv, args, embeddings=None, should_eval=True):
     train_sampler = get_sampler(dataset_train, train_labels)
     train_loader = DataLoader(dataset_train, sampler=train_sampler,batch_size=args['batch_size'], num_workers=4, pin_memory=False)
     
-    #Read the validation data here to avoid reading every epoch.
-    x_test, y_test, vocabulary, vocabulary_inv_list = data_helpers.load_data(args['datapath'],
+    #Read the validation data here to avoid reading every epoch (also batchwise)
+    x_val, y_val, vocabulary, vocabulary_inv_list = data_helpers.load_data(args['datapath'],
                                                                              cv,
                                                                              vocabulary, 
                                                                              vocabulary_inv_list, 
                                                                              args['sentence_len'])
    
-    y_test = torch.from_numpy(y_test).long()
-    x_test = torch.from_numpy(x_test).long()
-    
+    y_val = torch.from_numpy(y_val).long()
+    x_val = torch.from_numpy(x_val).long()
+    dataset_val = TensorDataset(x_val, y_val)
+    val_labels = [t[-1] for t in dataset_val]
+    val_sampler = get_sampler(dataset_val, val_labels)
+    val_loader = DataLoader(dataset_val, sampler=val_sampler, batch_size=args['batch_size'], num_workers=4, pin_memory=False)
+
     model = CNN(pretrained_embeddings,args)
     if args['use_cuda']:
         model = model.cuda()
@@ -98,7 +102,7 @@ def train(cv, args, embeddings=None, should_eval=True):
         sentence_vector = None
         if should_eval:
  
-            eval_acc, loss_test, sentence_vector, adict = eval_dev(model, x_test, y_test, cv, args, criterion)
+            eval_acc, loss_test, sentence_vector, adict = eval_dev(model, val_loader, cv, args, criterion)
             adict['val_epoch'] = epoch
             bm.step(adict,epoch)
             adict.update(args)
@@ -114,12 +118,39 @@ def train(cv, args, embeddings=None, should_eval=True):
 
     return model, args, vocabulary, vocabulary_inv_list
     
-def eval_dev(model, x_test, y_test, cv, args, criterion):
+def eval_dev(model, loader, cv, args, criterion):
     
-    if args['use_cuda']:
-        x_test = x_test.cuda()
-        y_test = y_test.cuda()
+    #if args['use_cuda']:
+    #    x_test = x_test.cuda()
+    #    y_test = y_test.cuda()
+    eval_acc = []
+    loss_test = []
+    sentence_vector = None
+    adict = None
+    count = 0
+
+    for inputs, labels in loader:
+
+        inputs, labels = Variable(inputs), Variable(labels)
+        if args['use_cuda']:
+            inputs, labels = inputs.cuda(), labels.cuda()
     
-    eval_acc, loss_test,sentence_vector, adict = evaluate(model, x_test, y_test, args, criterion, 'test' if cv is None else 'val')
+        acc, loss, vector, adict_per_itr = evaluate(model, inputs, labels, args, criterion, 'test' if cv is None else 'val')
+
+        eval_acc.append(acc)
+        loss_test.append(loss)
+        sentence_vector = vector if sentence_vector is None else np.concatenate((sentence_vector, vector), axis=0)    
+        if adict is None:
+            adict = adict_per_itr
+        else:
+            for key, value in adict_per_itr.items():
+                if not isinstance(value, str):
+                    adict[key] += adict_per_itr[key]
+   
+        count += 1
     
-    return eval_acc,  loss_test,sentence_vector, adict
+    for key, value in adict_per_itr.items():
+        if not isinstance(value, str):
+            adict[key] = adict_per_itr[key] / count
+
+    return np.mean(eval_acc), np.mean(loss_test), sentence_vector, adict

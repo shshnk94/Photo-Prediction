@@ -54,9 +54,14 @@ def run_cross_val(args, embeddings, device):
                                                                                  vocabulary_inv_list, 
                                                                                  args['sentence_len'])
    
-        y_test = torch.from_numpy(y_test).long()
-        x_test = torch.from_numpy(x_test).long()
-        eval_acc, loss_test, sentence_vector, adict = eval_dev(model, x_test, y_test, None, args, criterion)
+        #y_test = torch.from_numpy(y_test).long()
+        #x_test = torch.from_numpy(x_test).long()
+        dataset_test = TensorDataset(x_test, y_test)
+        test_labels = [t[-1] for t in dataset_test]
+        test_sampler = get_sampler(dataset_test, test_labels)
+        test_loader = DataLoader(dataset_test, sampler=test_sampler, batch_size=args['batch_size'], num_workers=4, pin_memory=False)
+
+        eval_acc, loss_test, sentence_vector, adict = eval_dev(model, test_loader, None, args, criterion)
         adict.update(args)
         cv_results.append(adict)
 

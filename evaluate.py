@@ -51,9 +51,9 @@ def val_performance(y_test,y_pred,y_probs,key='UNK',eval_type='val', verbose= Fa
         
 
 def evaluate(model, x_test, y_test,args,loss_fn,eval_type='val',verbose= False):
+
     model.eval()
     inputs = Variable(x_test)
-    print(inputs.shape)
     preds, vector = model(inputs)
     
     preds_c = torch.max(preds, 1)[1]
@@ -66,4 +66,4 @@ def evaluate(model, x_test, y_test,args,loss_fn,eval_type='val',verbose= False):
     else:
         adict=val_performance(y_test.detach().numpy(), preds_c.detach().numpy(), preds.detach().numpy())
 
-    return adict['F1'],loss_fn(preds, y_test).cpu().data.numpy(), vector.cpu().data.numpy(),adict
+    return adict['F1'], loss_fn(preds, y_test).cpu().data.numpy(), vector.cpu().data.numpy(), adict
